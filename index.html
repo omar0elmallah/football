@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة كرة قدم - إصدار النخبة</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a3d62;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 1000px;
+            height: 600px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #game-canvas {
+            background: linear-gradient(to bottom, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%);
+            display: block;
+        }
+        
+        #score-board {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 30px;
+            border-radius: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 100;
+        }
+        
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        #start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        #start-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+        }
+        
+        #start-button:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+        
+        .title {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.7);
+        }
+        
+        .goal-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .power-bar {
+            position: absolute;
+            bottom: 10px;
+            width: 100px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .power-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #f1c40f, #e74c3c);
+            transition: width 0.1s;
+        }
+        
+        #player1-power {
+            left: 20px;
+        }
+        
+        #player2-power {
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas" width="1000" height="600"></canvas>
+        
+        <div id="score-board">0 - 0</div>
+        
+        <div id="controls-info">
+            اللاعب 1: الأسهم | اللاعب 2: WASD | الضرب: مسافة لكل لاعب
+        </div>
+        
+        <div id="player1-power" class="power-bar">
+            <div class="power-fill"></div>
+        </div>
+        
+        <div id="player2-power" class="power-bar">
+            <div class="power-fill"></div>
+        </div>
+        
+        <div id="start-screen">
+            <h1 class="title">كرة القدم الإلكترونية</h1>
+            <p>أفضل لعبة كرة قدم للاعبين!</p>
+            <button id="start-button">بدء المباراة</button>
+        </div>
+        
+        <div class="goal-effect" id="goal-effect"></div>
+    </div>
+
+    <script>
+        // عناصر DOM
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const scoreBoard = document.getElementById('score-board');
+        const startScreen = document.getElementById('start-screen');
+        const startButton = document.getElementById('start-button');
+        const goalEffect = document.getElementById('goal-effect');
+        const player1PowerFill = document.querySelector('#player1-power .power-fill');
+        const player2PowerFill = document.querySelector('#player2-power .power-fill');
+
+        // حالات اللعبة
+        let gameRunning = false;
+        let animationFrameId;
+        let lastTime = 0;
+        
+        // إعدادات اللعبة
+        const config = {
+            playerSpeed: 6,
+            ballStartSpeed: 5,
+            maxBallSpeed: 15,
+            powerShotMultiplier: 2.5,
+            friction: 0.98,
+            playerSize: 40,
+            ballSize: 20,
+            goalWidth: 150,
+            postWidth: 10
+        };
+        
+        // الكائنات
+        const game = {
+            players: [
+                { // اللاعب 1
+                    x: canvas.width / 2 - config.playerSize / 2,
+                    y: canvas.height - 100,
+                    width: config.playerSize,
+                    height: config.playerSize,
+                    color: '#3498db',
+                    speed: config.playerSpeed,
+                    dx: 0,
+                    dy: 0,
+                    power: 0,
+                    isCharging: false,
+                    score: 0,
+                    controls: {
+                        left: 'ArrowLeft',
+                        right: 'ArrowRight',
+                        up: 'ArrowUp',
+                        down: 'ArrowDown',
+                        kick: ' '
+                    }
+                },
+                { // اللاعب 2
+                    x: canvas.width / 2 - config.playerSize / 2,
+                    y: 60,
+                    width: config.playerSize,
+                    height: config.playerSize,
+                    color: '#e74c3c',
+                    speed: config.playerSpeed,
+                    dx: 0,
+                    dy: 0,
+                    power: 0,
+                    isCharging: false,
+                    score: 0,
+                    controls: {
+                        left: 'a',
+                        right: 'd',
+                        up: 'w',
+                        down: 's',
+                        kick: ' '
+                    }
+                }
+            ],
+            ball: {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: config.ballSize / 2,
+                dx: 0,
+                dy: 0,
+                color: 'white'
+            },
+            field: {
+                width: canvas.width,
+                height: canvas.height,
+                center: {
+                    x: canvas.width / 2,
+                    y: canvas.height / 2
+                },
+                centerCircleRadius: 70
+            },
+            goals: [
+                { // الهدف السفلي (لللاعب 2)
+                    x: canvas.width / 2 - config.goalWidth / 2,
+                    y: canvas.height - 20,
+                    width: config.goalWidth,
+                    height: 10,
+                    color: '#e74c3c'
+                },
+                { // الهدف العلوي (لللاعب 1)
+                    x: canvas.width / 2 - config.goalWidth / 2,
+                    y: 10,
+                    width: config.goalWidth,
+                    height: 10,
+                    color: '#3498db'
+                }
+            ],
+            keys: {}
+        };
+        
+        // أحداث لوحة المفاتيح
+        window.addEventListener('keydown', (e) => {
+            game.keys[e.key] = true;
+            
+            // شحن الضربة للاعبين
+            game.players.forEach(player => {
+                if (e.key === player.controls.kick) {
+                    player.isCharging = true;
+                }
+            });
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            game.keys[e.key] = false;
+            
+            // تنفيذ الضربة عند ترك الزر
+            game.players.forEach(player => {
+                if (e.key === player.controls.kick && player.isCharging) {
+                    kickBall(player);
+                    player.isCharging = false;
+                    player.power = 0;
+                }
+            });
+        });
+        
+        // بدء اللعبة
+        startButton.addEventListener('click', () => {
+            startScreen.style.display = 'none';
+            gameRunning = true;
+            resetGame();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        });
+        
+        // وظيفة الضربة
+        function kickBall(player) {
+            // حساب المسافة بين اللاعب والكرة
+            const dx = game.ball.x - (player.x + player.width / 2);
+            const dy = game.ball.y - (player.y + player.height / 2);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // إذا كانت الكرة قريبة من اللاعب
+            if (distance < 60) {
+                // حساب زاوية وقوة الضربة
+                const angle = Math.atan2(dy, dx);
+                const power = player.power * config.powerShotMultiplier + 1;
+                
+                // تطبيق القوة على الكرة
+                game.ball.dx = Math.cos(angle) * power * 2;
+                game.ball.dy = Math.sin(angle) * power * 2;
+                
+                // الحد الأقصى لسرعة الكرة
+                const speed = Math.sqrt(game.ball.dx * game.ball.dx + game.ball.dy * game.ball.dy);
+                if (speed > config.maxBallSpeed) {
+                    game.ball.dx = (game.ball.dx / speed) * config.maxBallSpeed;
+                    game.ball.dy = (game.ball.dy / speed) * config.maxBallSpeed;
+                }
+                
+                // تأثير صوتي (يمكن إضافة صوت حقيقي هنا)
+                playSound('kick');
+            }
+        }
+        
+        // تأثيرات صوتية (بدائل)
+        function playSound(type) {
+            // في تطبيق حقيقي، يمكنك استخدام Howler.js أو Audio API
+            console.log('Playing sound:', type);
+        }
+        
+        // إعادة تعيين اللعبة
+        function resetGame() {
+            game.ball.x = game.field.center.x;
+            game.ball.y = game.field.center.y;
+            
+            // سرعة عشوائية للكرة عند البدء
+            const angle = Math.random() * Math.PI * 2;
+            game.ball.dx = Math.cos(angle) * config.ballStartSpeed;
+            game.ball.dy = Math.sin(angle) * config.ballStartSpeed;
+            
+            // إعادة تعيين مواقع اللاعبين
+            game.players[0].x = canvas.width / 2 - config.playerSize / 2;
+            game.players[0].y = canvas.height - 100;
+            
+            game.players[1].x = canvas.width / 2 - config.playerSize / 2;
+            game.players[1].y = 60;
+        }
+        
+        // تأثير الهدف
+        function showGoalEffect(color) {
+            goalEffect.style.backgroundColor = color;
+            goalEffect.style.opacity = 0.8;
+            
+            setTimeout(() => {
+                goalEffect.style.opacity = 0;
+            }, 500);
+        }
+        
+        // تحديث اللعبة
+        function update(deltaTime) {
+            // تحديث شحن الضربة للاعبين
+            game.players.forEach(player => {
+                if (player.isCharging && player.power < 100) {
+                    player.power += deltaTime * 0.1;
+                    if (player.power > 100) player.power = 100;
+                }
+            });
+            
+            // تحديث شريط القوة
+            player1PowerFill.style.width = `${game.players[0].power}%`;
+            player2PowerFill.style.width = `${game.players[1].power}%`;
+            
+            // حركة اللاعبين
+            game.players.forEach(player => {
+                player.dx = 0;
+                player.dy = 0;
+                
+                if (game.keys[player.controls.left]) player.dx = -player.speed;
+                if (game.keys[player.controls.right]) player.dx = player.speed;
+                if (game.keys[player.controls.up]) player.dy = -player.speed;
+                if (game.keys[player.controls.down]) player.dy = player.speed;
+                
+                // تحديث المواقع مع الحدود
+                player.x += player.dx;
+                player.y += player.dy;
+                
+                // حدود اللاعب 1 (النصف السفلي)
+                if (player === game.players[0]) {
+                    if (player.x < 0) player.x = 0;
+                    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+                    if (player.y < canvas.height / 2) player.y = canvas.height / 2;
+                    if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+                }
+                
+                // حدود اللاعب 2 (النصف العلوي)
+                if (player === game.players[1]) {
+                    if (player.x < 0) player.x = 0;
+                    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+                    if (player.y < 0) player.y = 0;
+                    if (player.y + player.height > canvas.height / 2) player.y = canvas.height / 2 - player.height;
+                }
+            });
+            
+            // حركة الكرة
+            game.ball.x += game.ball.dx * (deltaTime / 16);
+            game.ball.y += game.ball.dy * (deltaTime / 16);
+            
+            // احتكاك الكرة
+            game.ball.dx *= config.friction;
+            game.ball.dy *= config.friction;
+            
+            // إذا كانت سرعة الكرة بطيئة جدًا، توقف
+            if (Math.abs(game.ball.dx) < 0.1) game.ball.dx = 0;
+            if (Math.abs(game.ball.dy) < 0.1) game.ball.dy = 0;
+            
+            // ارتداد الكرة من الجدران
+            if (game.ball.x - game.ball.radius < 0 || game.ball.x + game.ball.radius > canvas.width) {
+                game.ball.dx *= -1;
+                playSound('wall');
+            }
+            
+            // ارتداد الكرة من اللاعبين
+            game.players.forEach(player => {
+                if (
+                    game.ball.x + game.ball.radius > player.x &&
+                    game.ball.x - game.ball.radius < player.x + player.width &&
+                    game.ball.y + game.ball.radius > player.y &&
+                    game.ball.y - game.ball.radius < player.y + player.height
+                ) {
+                    // حساب زاوية الارتداد
+                    const angle = Math.atan2(
+                        game.ball.y - (player.y + player.height / 2),
+                        game.ball.x - (player.x + player.width / 2)
+                    );
+                    
+                    // تطبيق القوة بناء على سرعة اللاعب
+                    const playerSpeed = Math.sqrt(player.dx * player.dx + player.dy * player.dy);
+                    const power = playerSpeed * 0.5 + 2;
+                    
+                    game.ball.dx = Math.cos(angle) * power;
+                    game.ball.dy = Math.sin(angle) * power;
+                    playSound('hit');
+                }
+            });
+            
+            // التحقق من الأهداف
+            game.goals.forEach((goal, index) => {
+                if (
+                    game.ball.x + game.ball.radius > goal.x &&
+                    game.ball.x - game.ball.radius < goal.x + goal.width &&
+                    game.ball.y + game.ball.radius > goal.y &&
+                    game.ball.y - game.ball.radius < goal.y + goal.height
+                ) {
+                    // تسجيل الهدف
+                    const scoringPlayerIndex = index === 0 ? 1 : 0;
+                    game.players[scoringPlayerIndex].score++;
+                    scoreBoard.textContent = `${game.players[0].score} - ${game.players[1].score}`;
+                    
+                    // تأثير الهدف
+                    showGoalEffect(goal.color);
+                    playSound('goal');
+                    
+                    // إعادة تعيين اللعبة
+                    setTimeout(resetGame, 1000);
+                }
+            });
+        }
+        
+        // رسم اللعبة
+        function draw() {
+            // مسح الشاشة
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // رسم العشب
+            drawGrass();
+            
+            // رسم الخطوط
+            drawFieldLines();
+            
+            // رسم الأهداف
+            drawGoals();
+            
+            // رسم اللاعبين
+            game.players.forEach(player => {
+                drawPlayer(player);
+            });
+            
+            // رسم الكرة
+            drawBall();
+        }
+        
+        // رسم العشب
+        function drawGrass() {
+            // خلفية الملعب
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // خطوط العشب
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 2;
+            
+            for (let i = 0; i < canvas.width; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            
+            for (let i = 0; i < canvas.height; i += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+        }
+        
+        // رسم خطوط الملعب
+        function drawFieldLines() {
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            
+            // خطوط الحدود
+            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+            
+            // خط المنتصف
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height / 2);
+            ctx.lineTo(canvas.width, canvas.height / 2);
+            ctx.stroke();
+            
+            // دائرة المنتصف
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, game.field.centerCircleRadius, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // نقطة المنتصف
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 5, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+        }
+        
+        // رسم الأهداف
+        function drawGoals() {
+            game.goals.forEach(goal => {
+                // الشباك
+                ctx.fillStyle = goal.color;
+                ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
+                
+                // القوائم
+                ctx.fillStyle = 'white';
+                ctx.fillRect(goal.x - config.postWidth, goal.y, config.postWidth, goal.height * 3);
+                ctx.fillRect(goal.x + goal.width, goal.y, config.postWidth, goal.height * 3);
+            });
+        }
+        
+        // رسم اللاعب
+        function drawPlayer(player) {
+            // الجسم
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            
+            // العيون (لإضافة مظهر شبيه بالشخصية)
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(
+                player.x + player.width * 0.3,
+                player.y + player.height * 0.4,
+                player.width * 0.15,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(
+                player.x + player.width * 0.7,
+                player.y + player.height * 0.4,
+                player.width * 0.15,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            // بؤبؤ العين
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(
+                player.x + player.width * 0.3 + (player.dx * 0.2),
+                player.y + player.height * 0.4 + (player.dy * 0.2),
+                player.width * 0.07,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(
+                player.x + player.width * 0.7 + (player.dx * 0.2),
+                player.y + player.height * 0.4 + (player.dy * 0.2),
+                player.width * 0.07,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+            
+            // الفم
+            ctx.beginPath();
+            ctx.arc(
+                player.x + player.width * 0.5,
+                player.y + player.height * 0.7,
+                player.width * 0.2,
+                0,
+                Math.PI
+            );
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        // رسم الكرة
+        function drawBall() {
+            // الكرة الأساسية
+            const gradient = ctx.createRadialGradient(
+                game.ball.x - game.ball.radius * 0.3,
+                game.ball.y - game.ball.radius * 0.3,
+                0,
+                game.ball.x,
+                game.ball.y,
+                game.ball.radius
+            );
+            gradient.addColorStop(0, '#f5f5f5');
+            gradient.addColorStop(1, '#bdbdbd');
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(game.ball.x, game.ball.y, game.ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // تفاصيل الكرة
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+            
+            // خطوط الكرة (نمط كرة القدم التقليدية)
+            ctx.beginPath();
+            ctx.arc(game.ball.x, game.ball.y, game.ball.radius, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(game.ball.x, game.ball.y, game.ball.radius, Math.PI + 0.2, Math.PI * 2 - 0.2);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(
+                game.ball.x + game.ball.radius * Math.cos(0.2),
+                game.ball.y + game.ball.radius * Math.sin(0.2)
+            );
+            ctx.lineTo(
+                game.ball.x + game.ball.radius * Math.cos(Math.PI + 0.2),
+                game.ball.y + game.ball.radius * Math.sin(Math.PI + 0.2)
+            );
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(
+                game.ball.x + game.ball.radius * Math.cos(Math.PI/2 + 0.2),
+                game.ball.y + game.ball.radius * Math.sin(Math.PI/2 + 0.2)
+            );
+            ctx.lineTo(
+                game.ball.x + game.ball.radius * Math.cos(Math.PI*1.5 + 0.2),
+                game.ball.y + game.ball.radius * Math.sin(Math.PI*1.5 + 0.2)
+            );
+            ctx.stroke();
+        }
+        
+        // حلقة اللعبة الرئيسية
+        function gameLoop(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            if (gameRunning) {
+                update(deltaTime);
+                draw();
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+        }
+        
+        // بدء اللعبة عند تحميل الصفحة
+        window.addEventListener('load', () => {
+            draw(); // رسم الشاشة الأولية
+        });
+    </script>
+</body>
+</html>
