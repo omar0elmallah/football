@@ -103,7 +103,80 @@
             width: 80%;
             max-width: 500px;
         }
+        /* styles.css */
+
         
+        .start-button {
+            position: relative;
+            padding: 18px 45px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+        
+        .start-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #f39c12, #e74c3c);
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .start-button:hover::before {
+            opacity: 1;
+        }
+        
+        .start-button:active {
+            transform: translateY(0);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .start-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transition: transform 0.5s, opacity 0.5s;
+        }
+        
+        .start-button:focus:not(:active)::after {
+            animation: ripple 0.6s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(10);
+                opacity: 0;
+            }
+        }
         .menu-title {
             font-size: 24px;
             margin-bottom: 15px;
@@ -262,7 +335,7 @@
                     الفريق الأحمر: WASD للحركة، Q للضربة، E للتمرير
                 </p>
             </div>
-            
+    <button id="start-btn" class="start-button">بدء اللعب</button>     
             <button id="start-btn" class="btn btn-large">بدء المباراة</button>
         </div>
     </div>
@@ -459,6 +532,38 @@
                 }
             });
         }
+        // script.js
+        document.addEventListener('DOMContentLoaded', () => {
+            const startBtn = document.getElementById('start-btn');
+            
+            // تأثير عند النقر
+            startBtn.addEventListener('click', () => {
+                // يمكنك تغيير هذا الجزء ليتناسب مع لعبتك
+                console.log('تم النقر على زر البدء!');
+                
+                // تأثير اهتزاز بسيط
+                startBtn.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    startBtn.style.animation = '';
+                }, 500);
+                
+                // إخفاء الزر بعد النقر (اختياري)
+                setTimeout(() => {
+                    startBtn.style.transform = 'scale(0)';
+                    startBtn.style.opacity = '0';
+                }, 200);
+            });
+            
+            // إضافة تأثيرات إضافية عند التحويم
+            startBtn.addEventListener('mouseenter', () => {
+                startBtn.style.transition = 'all 0.3s ease';
+            });
+            
+            startBtn.addEventListener('mouseleave', () => {
+                startBtn.style.transition = 'all 0.3s ease';
+            });
+        });
+
 
         // إنشاء نمط العشب
         function createGrassPattern() {
