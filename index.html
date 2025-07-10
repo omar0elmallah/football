@@ -736,7 +736,69 @@
             team1ScoreEl.textContent = game.teams[0].score;
             team2ScoreEl.textContent = game.teams[1].score;
         }
-
+        // هذه الدالة تتحقق من تسجيل الأهداف وتحدث النتيجة
+        function checkGoals() {
+            // تحقق من كل مرمى
+            game.goals.forEach((goal, index) => {
+                // تحقق إذا كانت الكرة داخل المرمى
+                if (isBallInGoal(goal)) {
+                    // الفريق الذي سجل هو الفريق الآخر (لأن index 0 هو مرمى الفريق 1 والعكس)
+                    const scoringTeamIndex = index === 0 ? 1 : 0;
+                    
+                    // تحقق أن الكرة لم تدخل مرمى الفريق نفسه
+                    if (game.ball.lastTouch !== scoringTeamIndex) {
+                        // زيادة النتيجة
+                        game.teams[scoringTeamIndex].score++;
+                        updateScoreDisplay();
+                        
+                        // عرض تأثير الهدف
+                        showGoalEffect(scoringTeamIndex);
+                        
+                        // إعادة تعيين الكرة بعد تأخير
+                        setTimeout(resetBall, 1000);
+                    } else {
+                        // إذا دخلت الكرة مرمى الفريق نفسه، لا تحسب مع إعادة تعيين الكرة
+                        setTimeout(resetBall, 500);
+                    }
+                }
+            });
+        }
+        
+        // دالة التحقق من وجود الكرة في المرمى
+        function isBallInGoal(goal) {
+            return (
+                game.ball.x + game.ball.radius > goal.x &&
+                game.ball.x - game.ball.radius < goal.x + goal.width &&
+                game.ball.y + game.ball.radius > goal.y &&
+                game.ball.y - game.ball.radius < goal.y + goal.height
+            );
+        }
+        
+        // دالة تحديث عرض النتيجة
+        function updateScoreDisplay() {
+            team1ScoreEl.textContent = game.teams[0].score;
+            team2ScoreEl.textContent = game.teams[1].score;
+        }
+        
+        // دالة إعادة تعيين الكرة
+        function resetBall() {
+            game.ball.x = canvas.width / 2;
+            game.ball.y = canvas.height / 2;
+            game.ball.dx = 0;
+            game.ball.dy = 0;
+            game.ball.lastTouch = null;
+        }
+        
+        // دالة عرض تأثير الهدف
+        function showGoalEffect(teamIndex) {
+            const color = teamIndex === 0 ? game.teams[0].color : game.teams[1].color;
+            goalEffect.style.backgroundColor = color;
+            goalEffect.style.opacity = '0.8';
+            
+            setTimeout(() => {
+                goalEffect.style.opacity = '0';
+            }, 1000);
+        }
         // إعادة تعيين الكرة
         function resetBall() {
             game.ball.x = canvas.width / 2;
