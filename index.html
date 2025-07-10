@@ -77,17 +77,18 @@
             background: #e74c3c;
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 24px;
+            padding: 20px 50px;
+            font-size: 28px;
             border-radius: 30px;
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s;
+            z-index: 201; /* التأكد إن الزر فوق كل العناصر */
         }
         
         #start-button:hover {
             background: #c0392b;
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
         
         .title {
@@ -135,7 +136,7 @@
         }
 
         .color-selector {
-            margin: 10px 0;
+            margin: 15px 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -173,7 +174,7 @@
         </div>
         
         <div id="player2-power" class="power-bar">
-            <div>الفريق الأحمر: WASD للتحرك، Q للتسديد (اضغط باستمرار لزيادة القوة)، E للتمرير</div>
+            <div class="power-fill"></div>
         </div>
         
         <div id="start-screen">
@@ -181,7 +182,7 @@
             <div class="color-selector">
                 <h3>اختر لون الفريق الأزرق</h3>
                 <div>
-                    <div class="color-option" style="background: #3498db" data-color="#3498db" data-team="0"></div>
+                    <div class="color-option selected" style="background: #3498db" data-color="#3498db" data-team="0"></div>
                     <div class="color-option" style="background: #2ecc71" data-color="#2ecc71" data-team="0"></div>
                     <div class="color-option" style="background: #9b59b6" data-color="#9b59b6" data-team="0"></div>
                     <div class="color-option" style="background: #f1c40f" data-color="#f1c40f" data-team="0"></div>
@@ -190,7 +191,7 @@
             <div class="color-selector">
                 <h3>اختر لون الفريق الأحمر</h3>
                 <div>
-                    <div class="color-option" style="background: #e74c3c" data-color="#e74c3c" data-team="1"></div>
+                    <div class="color-option selected" style="background: #e74c3c" data-color="#e74c3c" data-team="1"></div>
                     <div class="color-option" style="background: #e67e22" data-color="#e67e22" data-team="1"></div>
                     <div class="color-option" style="background: #1abc9c" data-color="#1abc9c" data-team="1"></div>
                     <div class="color-option" style="background: #34495e" data-color="#34495e" data-team="1"></div>
@@ -213,6 +214,11 @@
         const player1PowerFill = document.querySelector('#player1-power .power-fill');
         const player2PowerFill = document.querySelector('#player2-power .power-fill');
 
+        // التحقق من وجود العناصر
+        if (!canvas || !ctx || !scoreBoard || !startScreen || !startButton || !goalEffect || !player1PowerFill || !player2PowerFill) {
+            console.error('خطأ: أحد عناصر DOM غير موجود!');
+        }
+
         // حالات اللعبة
         let gameRunning = false;
         let animationFrameId;
@@ -220,26 +226,26 @@
         
         // إعدادات اللعبة
         const config = {
-            playerSpeed: 6, // زيادة سرعة اللاعب لتحسين التحكم
+            playerSpeed: 6,
             ballStartSpeed: 4,
             maxBallSpeed: 20,
             powerShotMultiplier: 3,
             passSpeed: 10,
-            attractionDistance: 120, // زيادة مسافة جذب الكرة
-            attractionForce: 0.08, // زيادة قوة جذب الكرة
+            attractionDistance: 120,
+            attractionForce: 0.08,
             friction: 0.95,
             bounceFriction: 0.85,
             playerSize: 30,
             ballSize: 18,
             goalWidth: 150,
             postWidth: 10,
-            fieldPadding: 40 // زيادة الحدود لإبعاد اللاعبين عن الجدران
+            fieldPadding: 40
         };
         
         // الكائنات
         const game = {
             teams: [
-                { // الفريق الأزرق
+                { 
                     color: '#3498db',
                     players: [],
                     controlledPlayer: 0,
@@ -253,7 +259,7 @@
                         pass: 'Shift'
                     }
                 },
-                { // الفريق الأحمر
+                { 
                     color: '#e74c3c',
                     players: [],
                     controlledPlayer: 0,
@@ -288,14 +294,14 @@
                 padding: config.fieldPadding
             },
             goals: [
-                { // الهدف السفلي (للفريق الأحمر)
+                { 
                     x: canvas.width / 2 - config.goalWidth / 2,
                     y: canvas.height - 20,
                     width: config.goalWidth,
                     height: 10,
                     color: '#e74c3c'
                 },
-                { // الهدف العلوي (للفريق الأزرق)
+                { 
                     x: canvas.width / 2 - config.goalWidth / 2,
                     y: 10,
                     width: config.goalWidth,
@@ -306,11 +312,11 @@
             keys: {}
         };
         
-        // تهيئة اللاعبين (لاعب واحد لكل فريق فقط)
+        // تهيئة اللاعبين
         function initPlayers() {
+            console.log('تهيئة اللاعبين...');
             game.teams.forEach((team, teamIndex) => {
                 team.players = [];
-                // اللاعب الأساسي
                 team.players.push({
                     x: canvas.width / 2 - config.playerSize / 2,
                     y: teamIndex === 0 ? canvas.height - 100 : 60,
@@ -332,18 +338,13 @@
         const colorOptions = document.querySelectorAll('.color-option');
         colorOptions.forEach(option => {
             option.addEventListener('click', () => {
+                console.log('اختيار لون:', option.dataset.color, 'للفريق:', option.dataset.team);
                 const teamIndex = parseInt(option.dataset.team);
                 const color = option.dataset.color;
-                
-                // إزالة التحديد من الألوان الأخرى لنفس الفريق
                 document.querySelectorAll(`.color-option[data-team="${teamIndex}"]`).forEach(opt => {
                     opt.classList.remove('selected');
                 });
-                
-                // إضافة التحديد للون المختار
                 option.classList.add('selected');
-                
-                // تحديث لون الفريق
                 game.teams[teamIndex].color = color;
                 if (teamIndex === 0) {
                     game.goals[1].color = color;
@@ -351,6 +352,16 @@
                     game.goals[0].color = color;
                 }
             });
+        });
+        
+        // بدء اللعبة
+        startButton.addEventListener('click', () => {
+            console.log('تم النقر على زر بدء المباراة');
+            startScreen.style.display = 'none';
+            gameRunning = true;
+            initPlayers();
+            resetGame();
+            animationFrameId = requestAnimationFrame(gameLoop);
         });
         
         // أحداث لوحة المفاتيح
@@ -362,7 +373,7 @@
                     player.isCharging = true;
                 }
                 if (e.key === team.controls.pass) {
-                    kickBall(player, true); // التمرير يستخدم نفس دالة التسديد مع قوة ثابتة
+                    kickBall(player, true);
                 }
             });
         });
@@ -379,15 +390,6 @@
             });
         });
         
-        // بدء اللعبة
-        startButton.addEventListener('click', () => {
-            startScreen.style.display = 'none';
-            gameRunning = true;
-            initPlayers();
-            resetGame();
-            animationFrameId = requestAnimationFrame(gameLoop);
-        });
-        
         // وظيفة التسديد/التمرير
         function kickBall(player, isPass = false) {
             const dx = game.ball.x - (player.x + player.width / 2);
@@ -396,12 +398,7 @@
             
             if (distance < 60) {
                 const angle = Math.atan2(dy, dx);
-                let power;
-                if (isPass) {
-                    power = config.passSpeed;
-                } else {
-                    power = player.power * config.powerShotMultiplier + 3;
-                }
+                let power = isPass ? config.passSpeed : player.power * config.powerShotMultiplier + 3;
                 
                 game.ball.dx = Math.cos(angle) * power;
                 game.ball.dy = Math.sin(angle) * power;
@@ -419,6 +416,7 @@
         
         // إعادة تعيين اللعبة
         function resetGame() {
+            console.log('إعادة تعيين اللعبة...');
             game.ball.x = game.field.center.x;
             game.ball.y = game.field.center.y;
             const angle = Math.random() * Math.PI * 2;
@@ -446,7 +444,7 @@
             }
         }
         
-        // انجذاب الكرة للاعبين القريبين
+        // انجذاب الكرة
         function applyBallAttraction() {
             let closestPlayer = null;
             let minDistance = Infinity;
@@ -498,9 +496,8 @@
                 if (game.keys[team.controls.up]) player.dy = -player.speed;
                 if (game.keys[team.controls.down]) player.dy = player.speed;
                 
-                // تحسين التحكم بحركة قطرية
                 if (player.dx !== 0 && player.dy !== 0) {
-                    const diagonalFactor = 0.7071; // cos(45°)
+                    const diagonalFactor = 0.7071;
                     player.dx *= diagonalFactor;
                     player.dy *= diagonalFactor;
                 }
@@ -508,13 +505,10 @@
                 player.x += player.dx;
                 player.y += player.dy;
                 
-                // حدود الفريق الأزرق
                 if (team === game.teams[0]) {
                     player.x = Math.max(config.fieldPadding, Math.min(canvas.width - config.fieldPadding - player.width, player.x));
                     player.y = Math.max(canvas.height / 2, Math.min(canvas.height - config.fieldPadding - player.height, player.y));
                 }
-                
-                // حدود الفريق الأحمر
                 if (team === game.teams[1]) {
                     player.x = Math.max(config.fieldPadding, Math.min(canvas.width - config.fieldPadding - player.width, player.x));
                     player.y = Math.max(config.fieldPadding, Math.min(canvas.height / 2 - player.height, player.y));
@@ -534,7 +528,6 @@
             if (Math.abs(game.ball.dx) < 0.1) game.ball.dx = 0;
             if (Math.abs(game.ball.dy) < 0.1) game.ball.dy = 0;
             
-            // حدود الكرة
             if (game.ball.x - game.ball.radius < game.field.padding) {
                 game.ball.x = game.field.padding + game.ball.radius;
                 game.ball.dx *= -config.bounceFriction;
@@ -611,7 +604,6 @@
             drawBall();
         }
         
-        // رسم العشب
         function drawGrass() {
             ctx.fillStyle = '#2ecc71';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -631,7 +623,6 @@
             }
         }
         
-        // رسم خطوط الملعب
         function drawFieldLines() {
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
@@ -654,7 +645,6 @@
             ctx.fill();
         }
         
-        // رسم الأهداف
         function drawGoals() {
             game.goals.forEach(goal => {
                 ctx.fillStyle = goal.color;
@@ -665,7 +655,6 @@
             });
         }
         
-        // رسم اللاعب
         function drawPlayer(player) {
             ctx.fillStyle = player.color;
             ctx.fillRect(player.x, player.y, player.width, player.height);
@@ -723,7 +712,6 @@
             ctx.stroke();
         }
         
-        // رسم الكرة
         function drawBall() {
             const gradient = ctx.createRadialGradient(
                 game.ball.x - game.ball.radius * 0.3,
@@ -742,7 +730,7 @@
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(game不支持: game.ball.x, game.ball.y, game.ball.radius, 0.2, Math.PI - 0.2);
+            ctx.arc(game.ball.x, game.ball.y, game.ball.radius, 0.2, Math.PI - 0.2);
             ctx.stroke();
             ctx.beginPath();
             ctx.arc(game.ball.x, game.ball.y, game.ball.radius, Math.PI + 0.2, Math.PI * 2 - 0.2);
@@ -769,7 +757,6 @@
             ctx.stroke();
         }
         
-        // حلقة اللعبة
         function gameLoop(timestamp) {
             if (!lastTime) lastTime = timestamp;
             const deltaTime = timestamp - lastTime;
@@ -783,6 +770,7 @@
         }
         
         window.addEventListener('load', () => {
+            console.log('تحميل الصفحة...');
             initPlayers();
             draw();
         });
