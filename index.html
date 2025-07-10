@@ -52,10 +52,11 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
+            padding: 15px 30px;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 18px;
             text-align: center;
+            max-width: 80%;
         }
         
         #start-screen {
@@ -64,7 +65,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -80,7 +81,7 @@
             font-size: 24px;
             border-radius: 30px;
             cursor: pointer;
-            margin-top: 30px;
+            margin-top: 20px;
             transition: all 0.3s;
         }
         
@@ -111,8 +112,8 @@
         .power-bar {
             position: absolute;
             bottom: 10px;
-            width: 100px;
-            height: 10px;
+            width: 120px;
+            height: 12px;
             background: rgba(255, 255, 255, 0.3);
             border-radius: 5px;
             overflow: hidden;
@@ -132,6 +133,28 @@
         #player2-power {
             right: 20px;
         }
+
+        .color-selector {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            display: inline-block;
+        }
+
+        .color-option.selected {
+            border-color: #f1c40f;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -141,7 +164,8 @@
         <div id="score-board">0 - 0</div>
         
         <div id="controls-info">
-            الفريق الأزرق: الأسهم (حركة) ، مسافة (ضربة) ، Shift (تمرير) | الفريق الأحمر: WASD (حركة) ، Q (ضربة) ، E (تمرير)
+            <div>الفريق الأزرق: الأسهم للتحرك، مسافة للتسديد (اضغط باستمرار لزيادة القوة)، Shift للتمرير</div>
+            <div>الفريق الأحمر: WASD للتحرك، Q للتسديد (اضغط باستمرار لزيادة القوة)، E للتمرير</div>
         </div>
         
         <div id="player1-power" class="power-bar">
@@ -149,12 +173,29 @@
         </div>
         
         <div id="player2-power" class="power-bar">
-            <div class="power-fill"></div>
+            <div>الفريق الأحمر: WASD للتحرك، Q للتسديد (اضغط باستمرار لزيادة القوة)، E للتمرير</div>
         </div>
         
         <div id="start-screen">
             <h1 class="title">كرة القدم المحترفة</h1>
-            <p>كل فريق مكون من 3 لاعبين (تتحكم في اللاعب الأساسي)</p>
+            <div class="color-selector">
+                <h3>اختر لون الفريق الأزرق</h3>
+                <div>
+                    <div class="color-option" style="background: #3498db" data-color="#3498db" data-team="0"></div>
+                    <div class="color-option" style="background: #2ecc71" data-color="#2ecc71" data-team="0"></div>
+                    <div class="color-option" style="background: #9b59b6" data-color="#9b59b6" data-team="0"></div>
+                    <div class="color-option" style="background: #f1c40f" data-color="#f1c40f" data-team="0"></div>
+                </div>
+            </div>
+            <div class="color-selector">
+                <h3>اختر لون الفريق الأحمر</h3>
+                <div>
+                    <div class="color-option" style="background: #e74c3c" data-color="#e74c3c" data-team="1"></div>
+                    <div class="color-option" style="background: #e67e22" data-color="#e67e22" data-team="1"></div>
+                    <div class="color-option" style="background: #1abc9c" data-color="#1abc9c" data-team="1"></div>
+                    <div class="color-option" style="background: #34495e" data-color="#34495e" data-team="1"></div>
+                </div>
+            </div>
             <button id="start-button">بدء المباراة</button>
         </div>
         
@@ -179,27 +220,26 @@
         
         // إعدادات اللعبة
         const config = {
-            playerSpeed: 5,
-            aiSpeed: 3,
+            playerSpeed: 6, // زيادة سرعة اللاعب لتحسين التحكم
             ballStartSpeed: 4,
-            maxBallSpeed: 18,
-            powerShotMultiplier: 2.5,
-            passSpeed: 8,
-            attractionDistance: 100,
-            attractionForce: 0.05,
-            friction: 0.96,
-            bounceFriction: 0.9,
+            maxBallSpeed: 20,
+            powerShotMultiplier: 3,
+            passSpeed: 10,
+            attractionDistance: 120, // زيادة مسافة جذب الكرة
+            attractionForce: 0.08, // زيادة قوة جذب الكرة
+            friction: 0.95,
+            bounceFriction: 0.85,
             playerSize: 30,
             ballSize: 18,
             goalWidth: 150,
             postWidth: 10,
-            teamSize: 3
+            fieldPadding: 40 // زيادة الحدود لإبعاد اللاعبين عن الجدران
         };
         
         // الكائنات
         const game = {
             teams: [
-                { // الفريق الأزرق (أسفل)
+                { // الفريق الأزرق
                     color: '#3498db',
                     players: [],
                     controlledPlayer: 0,
@@ -213,7 +253,7 @@
                         pass: 'Shift'
                     }
                 },
-                { // الفريق الأحمر (أعلى)
+                { // الفريق الأحمر
                     color: '#e74c3c',
                     players: [],
                     controlledPlayer: 0,
@@ -245,7 +285,7 @@
                     y: canvas.height / 2
                 },
                 centerCircleRadius: 70,
-                padding: 20
+                padding: config.fieldPadding
             },
             goals: [
                 { // الهدف السفلي (للفريق الأحمر)
@@ -266,12 +306,11 @@
             keys: {}
         };
         
-        // تهيئة اللاعبين
+        // تهيئة اللاعبين (لاعب واحد لكل فريق فقط)
         function initPlayers() {
             game.teams.forEach((team, teamIndex) => {
                 team.players = [];
-                
-                // اللاعب الأساسي (وسط الملعب)
+                // اللاعب الأساسي
                 team.players.push({
                     x: canvas.width / 2 - config.playerSize / 2,
                     y: teamIndex === 0 ? canvas.height - 100 : 60,
@@ -286,54 +325,52 @@
                     isControlled: true,
                     team: teamIndex
                 });
-                
-                // لاعبين إضافيين لكل فريق
-                for (let i = 1; i < config.teamSize; i++) {
-                    const angle = (i / (config.teamSize - 1)) * Math.PI * 0.8 + Math.PI * 0.1;
-                    const distance = 120;
-                    
-                    team.players.push({
-                        x: canvas.width / 2 - config.playerSize / 2 + Math.cos(angle) * distance * (teamIndex === 0 ? -1 : 1),
-                        y: (teamIndex === 0 ? canvas.height - 150 : 90) + Math.sin(angle) * distance,
-                        width: config.playerSize,
-                        height: config.playerSize,
-                        color: team.color,
-                        speed: config.aiSpeed,
-                        dx: 0,
-                        dy: 0,
-                        power: 0,
-                        isCharging: false,
-                        isControlled: false,
-                        team: teamIndex
-                    });
-                }
             });
         }
+        
+        // اختيار الألوان
+        const colorOptions = document.querySelectorAll('.color-option');
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const teamIndex = parseInt(option.dataset.team);
+                const color = option.dataset.color;
+                
+                // إزالة التحديد من الألوان الأخرى لنفس الفريق
+                document.querySelectorAll(`.color-option[data-team="${teamIndex}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                // إضافة التحديد للون المختار
+                option.classList.add('selected');
+                
+                // تحديث لون الفريق
+                game.teams[teamIndex].color = color;
+                if (teamIndex === 0) {
+                    game.goals[1].color = color;
+                } else {
+                    game.goals[0].color = color;
+                }
+            });
+        });
         
         // أحداث لوحة المفاتيح
         window.addEventListener('keydown', (e) => {
             game.keys[e.key] = true;
-            
-            // شحن الضربة للاعبين
             game.teams.forEach(team => {
-                const player = team.players[team.controlledPlayer];
+                const player = team.players[0];
                 if (e.key === team.controls.kick) {
                     player.isCharging = true;
                 }
-                
-                // التمرير
                 if (e.key === team.controls.pass) {
-                    passBall(player);
+                    kickBall(player, true); // التمرير يستخدم نفس دالة التسديد مع قوة ثابتة
                 }
             });
         });
         
         window.addEventListener('keyup', (e) => {
             game.keys[e.key] = false;
-            
-            // تنفيذ الضربة عند ترك الزر
             game.teams.forEach(team => {
-                const player = team.players[team.controlledPlayer];
+                const player = team.players[0];
                 if (e.key === team.controls.kick && player.isCharging) {
                     kickBall(player);
                     player.isCharging = false;
@@ -351,80 +388,32 @@
             animationFrameId = requestAnimationFrame(gameLoop);
         });
         
-        // وظيفة الضربة
-        function kickBall(player) {
-            // حساب المسافة بين اللاعب والكرة
+        // وظيفة التسديد/التمرير
+        function kickBall(player, isPass = false) {
             const dx = game.ball.x - (player.x + player.width / 2);
             const dy = game.ball.y - (player.y + player.height / 2);
             const distance = Math.sqrt(dx * dx + dy * dy);
             
-            // إذا كانت الكرة قريبة من اللاعب
             if (distance < 60) {
-                // حساب زاوية وقوة الضربة
                 const angle = Math.atan2(dy, dx);
-                const power = player.power * config.powerShotMultiplier + 2;
+                let power;
+                if (isPass) {
+                    power = config.passSpeed;
+                } else {
+                    power = player.power * config.powerShotMultiplier + 3;
+                }
                 
-                // تطبيق القوة على الكرة
                 game.ball.dx = Math.cos(angle) * power;
                 game.ball.dy = Math.sin(angle) * power;
                 game.ball.lastTouch = player.team;
                 
-                // الحد الأقصى لسرعة الكرة
                 limitBallSpeed();
-                
-                // تأثير صوتي
-                playSound('kick');
-            }
-        }
-        
-        // وظيفة التمرير
-        function passBall(player) {
-            // حساب المسافة بين اللاعب والكرة
-            const dx = game.ball.x - (player.x + player.width / 2);
-            const dy = game.ball.y - (player.y + player.height / 2);
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance < 60) {
-                // البحث عن أقرب زميل
-                let closestTeammate = null;
-                let minDistance = Infinity;
-                
-                game.teams[player.team].players.forEach((teammate, index) => {
-                    if (teammate !== player) {
-                        const dist = Math.sqrt(
-                            Math.pow(teammate.x + teammate.width/2 - game.ball.x, 2) + 
-                            Math.pow(teammate.y + teammate.height/2 - game.ball.y, 2)
-                        );
-                        
-                        if (dist < minDistance) {
-                            minDistance = dist;
-                            closestTeammate = teammate;
-                        }
-                    }
-                });
-                
-                if (closestTeammate) {
-                    // حساب زاوية التمرير
-                    const targetX = closestTeammate.x + closestTeammate.width/2;
-                    const targetY = closestTeammate.y + closestTeammate.height/2;
-                    const angle = Math.atan2(
-                        targetY - (player.y + player.height/2),
-                        targetX - (player.x + player.width/2)
-                    );
-                    
-                    // تطبيق القوة على الكرة (تمرير لطيف)
-                    game.ball.dx = Math.cos(angle) * config.passSpeed;
-                    game.ball.dy = Math.sin(angle) * config.passSpeed;
-                    game.ball.lastTouch = player.team;
-                    
-                    playSound('pass');
-                }
+                playSound(isPass ? 'pass' : 'kick');
             }
         }
         
         // تأثيرات صوتية
         function playSound(type) {
-            // في تطبيق حقيقي، يمكنك استخدام Howler.js أو Audio API
             console.log('Playing sound:', type);
         }
         
@@ -432,14 +421,10 @@
         function resetGame() {
             game.ball.x = game.field.center.x;
             game.ball.y = game.field.center.y;
-            
-            // سرعة عشوائية للكرة عند البدء
             const angle = Math.random() * Math.PI * 2;
             game.ball.dx = Math.cos(angle) * config.ballStartSpeed;
             game.ball.dy = Math.sin(angle) * config.ballStartSpeed;
             game.ball.lastTouch = null;
-            
-            // إعادة تعيين مواقع اللاعبين
             initPlayers();
         }
         
@@ -447,7 +432,6 @@
         function showGoalEffect(color) {
             goalEffect.style.backgroundColor = color;
             goalEffect.style.opacity = 0.8;
-            
             setTimeout(() => {
                 goalEffect.style.opacity = 0;
             }, 500);
@@ -462,61 +446,11 @@
             }
         }
         
-        // حركة اللاعبين الآليين
-        function moveAIPlayers() {
-            game.teams.forEach(team => {
-                team.players.forEach((player, index) => {
-                    if (!player.isControlled) {
-                        // إذا كانت الكرة مع الفريق الآخر، عد إلى الموضع الدفاعي
-                        if (game.ball.lastTouch !== null && game.ball.lastTouch !== player.team) {
-                            const targetX = canvas.width / 2 - config.playerSize / 2 + 
-                                (index - 1) * 60 * (player.team === 0 ? -1 : 1);
-                            const targetY = player.team === 0 ? 
-                                canvas.height - 100 - (index * 40) : 
-                                60 + (index * 40);
-                            
-                            const dx = targetX - player.x;
-                            const dy = targetY - player.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            
-                            if (distance > 10) {
-                                player.dx = (dx / distance) * player.speed * 0.7;
-                                player.dy = (dy / distance) * player.speed * 0.7;
-                            } else {
-                                player.dx = 0;
-                                player.dy = 0;
-                            }
-                        } 
-                        // إذا كانت الكرة مع فريقه، حاول الوصول إليها
-                        else {
-                            const dx = game.ball.x - (player.x + player.width/2);
-                            const dy = game.ball.y - (player.y + player.height/2);
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            
-                            if (distance > 50) {
-                                player.dx = (dx / distance) * player.speed;
-                                player.dy = (dy / distance) * player.speed;
-                            } else {
-                                player.dx = 0;
-                                player.dy = 0;
-                                
-                                // إذا كان قريبًا من الكرة، قد يحاول التمرير
-                                if (distance < 40 && Math.random() < 0.02) {
-                                    passBall(player);
-                                }
-                            }
-                        }
-                    }
-                });
-            });
-        }
-        
         // انجذاب الكرة للاعبين القريبين
         function applyBallAttraction() {
             let closestPlayer = null;
             let minDistance = Infinity;
             
-            // البحث عن أقرب لاعب
             game.teams.forEach(team => {
                 team.players.forEach(player => {
                     const dx = game.ball.x - (player.x + player.width/2);
@@ -530,13 +464,10 @@
                 });
             });
             
-            // تطبيق قوة الانجذاب إذا كان هناك لاعب قريب
             if (closestPlayer && minDistance > 20) {
                 const dx = (closestPlayer.x + closestPlayer.width/2) - game.ball.x;
                 const dy = (closestPlayer.y + closestPlayer.height/2) - game.ball.y;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                // قوة الانجذاب تتناسب عكسيا مع المسافة
                 const force = config.attractionForce * (1 - (distance / config.attractionDistance));
                 
                 game.ball.dx += dx / distance * force;
@@ -546,22 +477,19 @@
         
         // تحديث اللعبة
         function update(deltaTime) {
-            // تحديث شحن الضربة للاعبين
             game.teams.forEach(team => {
-                const player = team.players[team.controlledPlayer];
+                const player = team.players[0];
                 if (player.isCharging && player.power < 100) {
-                    player.power += deltaTime * 0.1;
+                    player.power += deltaTime * 0.12;
                     if (player.power > 100) player.power = 100;
                 }
             });
             
-            // تحديث شريط القوة
-            player1PowerFill.style.width = `${game.teams[0].players[game.teams[0].controlledPlayer].power}%`;
-            player2PowerFill.style.width = `${game.teams[1].players[game.teams[1].controlledPlayer].power}%`;
+            player1PowerFill.style.width = `${game.teams[0].players[0].power}%`;
+            player2PowerFill.style.width = `${game.teams[1].players[0].power}%`;
             
-            // حركة اللاعبين المتحكم بهم
             game.teams.forEach(team => {
-                const player = team.players[team.controlledPlayer];
+                const player = team.players[0];
                 player.dx = 0;
                 player.dy = 0;
                 
@@ -570,56 +498,43 @@
                 if (game.keys[team.controls.up]) player.dy = -player.speed;
                 if (game.keys[team.controls.down]) player.dy = player.speed;
                 
-                // تحديث المواقع مع الحدود
+                // تحسين التحكم بحركة قطرية
+                if (player.dx !== 0 && player.dy !== 0) {
+                    const diagonalFactor = 0.7071; // cos(45°)
+                    player.dx *= diagonalFactor;
+                    player.dy *= diagonalFactor;
+                }
+                
                 player.x += player.dx;
                 player.y += player.dy;
                 
-                // حدود الفريق الأزرق (النصف السفلي)
+                // حدود الفريق الأزرق
                 if (team === game.teams[0]) {
-                    if (player.x < 0) player.x = 0;
-                    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-                    if (player.y < canvas.height / 2) player.y = canvas.height / 2;
-                    if (player.y + player.height > canvas.height) player.y = canvas.height - player.height;
+                    player.x = Math.max(config.fieldPadding, Math.min(canvas.width - config.fieldPadding - player.width, player.x));
+                    player.y = Math.max(canvas.height / 2, Math.min(canvas.height - config.fieldPadding - player.height, player.y));
                 }
                 
-                // حدود الفريق الأحمر (النصف العلوي)
+                // حدود الفريق الأحمر
                 if (team === game.teams[1]) {
-                    if (player.x < 0) player.x = 0;
-                    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
-                    if (player.y < 0) player.y = 0;
-                    if (player.y + player.height > canvas.height / 2) player.y = canvas.height / 2 - player.height;
+                    player.x = Math.max(config.fieldPadding, Math.min(canvas.width - config.fieldPadding - player.width, player.x));
+                    player.y = Math.max(config.fieldPadding, Math.min(canvas.height / 2 - player.height, player.y));
                 }
             });
             
-            // حركة اللاعبين الآليين
-            moveAIPlayers();
-            
-            // تحديث جميع اللاعبين
-            game.teams.forEach(team => {
-                team.players.forEach(player => {
-                    player.x += player.dx;
-                    player.y += player.dy;
-                });
-            });
-            
-            // انجذاب الكرة للاعبين القريبين
-            if (Math.sqrt(game.ball.dx * game.ball.dx + game.ball.dy * game.ball.dy) < 10) {
+            if (Math.sqrt(game.ball.dx * game.ball.dx + game.ball.dy * game.ball.dy) < 12) {
                 applyBallAttraction();
             }
             
-            // حركة الكرة
             game.ball.x += game.ball.dx * (deltaTime / 16);
             game.ball.y += game.ball.dy * (deltaTime / 16);
             
-            // احتكاك الكرة
             game.ball.dx *= config.friction;
             game.ball.dy *= config.friction;
             
-            // إذا كانت سرعة الكرة بطيئة جدًا، توقف
             if (Math.abs(game.ball.dx) < 0.1) game.ball.dx = 0;
             if (Math.abs(game.ball.dy) < 0.1) game.ball.dy = 0;
             
-            // ارتداد الكرة من الجدران (مع حدود الملعب)
+            // حدود الكرة
             if (game.ball.x - game.ball.radius < game.field.padding) {
                 game.ball.x = game.field.padding + game.ball.radius;
                 game.ball.dx *= -config.bounceFriction;
@@ -641,7 +556,6 @@
                 playSound('wall');
             }
             
-            // ارتداد الكرة من اللاعبين
             game.teams.forEach(team => {
                 team.players.forEach(player => {
                     if (
@@ -650,27 +564,22 @@
                         game.ball.y + game.ball.radius > player.y &&
                         game.ball.y - game.ball.radius < player.y + player.height
                     ) {
-                        // حساب زاوية الارتداد
                         const angle = Math.atan2(
                             game.ball.y - (player.y + player.height / 2),
                             game.ball.x - (player.x + player.width / 2)
                         );
-                        
-                        // تطبيق القوة بناء على سرعة اللاعب
                         const playerSpeed = Math.sqrt(player.dx * player.dx + player.dy * player.dy);
-                        const power = playerSpeed * 0.5 + 2;
+                        const power = playerSpeed * 0.6 + 3;
                         
                         game.ball.dx = Math.cos(angle) * power;
                         game.ball.dy = Math.sin(angle) * power;
                         game.ball.lastTouch = player.team;
                         limitBallSpeed();
-                        
                         playSound('hit');
                     }
                 });
             });
             
-            // التحقق من الأهداف
             game.goals.forEach((goal, index) => {
                 if (
                     game.ball.x + game.ball.radius > goal.x &&
@@ -678,16 +587,11 @@
                     game.ball.y + game.ball.radius > goal.y &&
                     game.ball.y - game.ball.radius < goal.y + goal.height
                 ) {
-                    // تسجيل الهدف
                     const scoringTeamIndex = index === 0 ? 1 : 0;
                     game.teams[scoringTeamIndex].score++;
                     scoreBoard.textContent = `${game.teams[0].score} - ${game.teams[1].score}`;
-                    
-                    // تأثير الهدف
                     showGoalEffect(goal.color);
                     playSound('goal');
-                    
-                    // إعادة تعيين اللعبة
                     setTimeout(resetGame, 1000);
                 }
             });
@@ -695,46 +599,30 @@
         
         // رسم اللعبة
         function draw() {
-            // مسح الشاشة
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // رسم العشب
             drawGrass();
-            
-            // رسم الخطوط
             drawFieldLines();
-            
-            // رسم الأهداف
             drawGoals();
-            
-            // رسم اللاعبين
             game.teams.forEach(team => {
                 team.players.forEach(player => {
                     drawPlayer(player);
                 });
             });
-            
-            // رسم الكرة
             drawBall();
         }
         
         // رسم العشب
         function drawGrass() {
-            // خلفية الملعب
             ctx.fillStyle = '#2ecc71';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // خطوط العشب
             ctx.strokeStyle = '#27ae60';
             ctx.lineWidth = 2;
-            
             for (let i = 0; i < canvas.width; i += 30) {
                 ctx.beginPath();
                 ctx.moveTo(i, 0);
                 ctx.lineTo(i, canvas.height);
                 ctx.stroke();
             }
-            
             for (let i = 0; i < canvas.height; i += 30) {
                 ctx.beginPath();
                 ctx.moveTo(0, i);
@@ -747,27 +635,19 @@
         function drawFieldLines() {
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 3;
-            
-            // خطوط الحدود
             ctx.strokeRect(
                 game.field.padding, 
                 game.field.padding, 
                 canvas.width - game.field.padding * 2, 
                 canvas.height - game.field.padding * 2
             );
-            
-            // خط المنتصف
             ctx.beginPath();
             ctx.moveTo(game.field.padding, canvas.height / 2);
             ctx.lineTo(canvas.width - game.field.padding, canvas.height / 2);
             ctx.stroke();
-            
-            // دائرة المنتصف
             ctx.beginPath();
             ctx.arc(canvas.width / 2, canvas.height / 2, game.field.centerCircleRadius, 0, Math.PI * 2);
             ctx.stroke();
-            
-            // نقطة المنتصف
             ctx.beginPath();
             ctx.arc(canvas.width / 2, canvas.height / 2, 5, 0, Math.PI * 2);
             ctx.fillStyle = 'white';
@@ -777,11 +657,8 @@
         // رسم الأهداف
         function drawGoals() {
             game.goals.forEach(goal => {
-                // الشباك
                 ctx.fillStyle = goal.color;
                 ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
-                
-                // القوائم
                 ctx.fillStyle = 'white';
                 ctx.fillRect(goal.x - config.postWidth, goal.y, config.postWidth, goal.height * 3);
                 ctx.fillRect(goal.x + goal.width, goal.y, config.postWidth, goal.height * 3);
@@ -790,18 +667,11 @@
         
         // رسم اللاعب
         function drawPlayer(player) {
-            // الجسم
             ctx.fillStyle = player.color;
             ctx.fillRect(player.x, player.y, player.width, player.height);
-            
-            // تحديد إذا كان اللاعب المتحكم به
-            if (player.isControlled) {
-                ctx.strokeStyle = 'yellow';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(player.x - 2, player.y - 2, player.width + 4, player.height + 4);
-            }
-            
-            // العيون
+            ctx.strokeStyle = 'yellow';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(player.x - 2, player.y - 2, player.width + 4, player.height + 4);
             ctx.fillStyle = 'white';
             ctx.beginPath();
             ctx.arc(
@@ -812,7 +682,6 @@
                 Math.PI * 2
             );
             ctx.fill();
-            
             ctx.beginPath();
             ctx.arc(
                 player.x + player.width * 0.7,
@@ -822,8 +691,6 @@
                 Math.PI * 2
             );
             ctx.fill();
-            
-            // بؤبؤ العين
             ctx.fillStyle = 'black';
             ctx.beginPath();
             ctx.arc(
@@ -834,7 +701,6 @@
                 Math.PI * 2
             );
             ctx.fill();
-            
             ctx.beginPath();
             ctx.arc(
                 player.x + player.width * 0.7 + (player.dx * 0.2),
@@ -844,8 +710,6 @@
                 Math.PI * 2
             );
             ctx.fill();
-            
-            // الفم
             ctx.beginPath();
             ctx.arc(
                 player.x + player.width * 0.5,
@@ -861,7 +725,6 @@
         
         // رسم الكرة
         function drawBall() {
-            // الكرة الأساسية
             const gradient = ctx.createRadialGradient(
                 game.ball.x - game.ball.radius * 0.3,
                 game.ball.y - game.ball.radius * 0.3,
@@ -872,25 +735,18 @@
             );
             gradient.addColorStop(0, '#f5f5f5');
             gradient.addColorStop(1, '#bdbdbd');
-            
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(game.ball.x, game.ball.y, game.ball.radius, 0, Math.PI * 2);
             ctx.fill();
-            
-            // تفاصيل الكرة
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1;
-            
-            // خطوط الكرة (نمط كرة القدم التقليدية)
             ctx.beginPath();
-            ctx.arc(game.ball.x, game.ball.y, game.ball.radius, 0.2, Math.PI - 0.2);
+            ctx.arc(game不支持: game.ball.x, game.ball.y, game.ball.radius, 0.2, Math.PI - 0.2);
             ctx.stroke();
-            
             ctx.beginPath();
             ctx.arc(game.ball.x, game.ball.y, game.ball.radius, Math.PI + 0.2, Math.PI * 2 - 0.2);
             ctx.stroke();
-            
             ctx.beginPath();
             ctx.moveTo(
                 game.ball.x + game.ball.radius * Math.cos(0.2),
@@ -901,7 +757,6 @@
                 game.ball.y + game.ball.radius * Math.sin(Math.PI + 0.2)
             );
             ctx.stroke();
-            
             ctx.beginPath();
             ctx.moveTo(
                 game.ball.x + game.ball.radius * Math.cos(Math.PI/2 + 0.2),
@@ -914,7 +769,7 @@
             ctx.stroke();
         }
         
-        // حلقة اللعبة الرئيسية
+        // حلقة اللعبة
         function gameLoop(timestamp) {
             if (!lastTime) lastTime = timestamp;
             const deltaTime = timestamp - lastTime;
@@ -927,10 +782,9 @@
             }
         }
         
-        // بدء اللعبة عند تحميل الصفحة
         window.addEventListener('load', () => {
             initPlayers();
-            draw(); // رسم الشاشة الأولية
+            draw();
         });
     </script>
 </body>
