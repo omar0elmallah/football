@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>كرة القدم المحترفة</title>
+    <title>🔥 كرة القدم الأسطورية 🔥</title>
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #e74c3c;
+            --field-color: #2ecc71;
+        }
+        
         body {
             margin: 0;
             padding: 0;
@@ -22,14 +28,179 @@
             position: relative;
             width: 1000px;
             height: 600px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
             border-radius: 10px;
             overflow: hidden;
         }
         
         #game-canvas {
-            background: linear-gradient(to bottom, #1e5799 0%,#2989d8 50%,#207cca 51%,#7db9e8 100%);
+            background: linear-gradient(135deg, #1e5799, #2989d8);
             display: block;
+        }
+        
+        #main-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            transition: all 0.5s;
+        }
+        
+        .title {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #f1c40f;
+            text-shadow: 0 0 15px rgba(241, 196, 15, 0.7);
+            text-align: center;
+            background: linear-gradient(to right, #f1c40f, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #f1c40f;
+            }
+            to {
+                text-shadow: 0 0 20px #e74c3c, 0 0 30px #f39c12;
+            }
+        }
+        
+        .menu-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            width: 80%;
+            max-width: 500px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .menu-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #f1c40f;
+            text-align: center;
+        }
+        
+        .option-group {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+        
+        .option-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .option-btn.selected {
+            background: var(--primary-color);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        
+        .option-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .color-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .color-option.selected {
+            border-color: white;
+            transform: scale(1.2);
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #e74c3c, #f39c12);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, #f39c12, #e74c3c);
+        }
+        
+        .start-btn:active {
+            transform: translateY(0);
+        }
+        
+        .start-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+        
+        .start-btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+        
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
         }
         
         #ui-container {
@@ -50,99 +221,14 @@
             background: rgba(0, 0, 0, 0.7);
             padding: 10px 30px;
             border-radius: 20px;
-            font-size: 24px;
+            font-size: 1.5rem;
             font-weight: bold;
             text-align: center;
             display: flex;
             align-items: center;
-        }
-        
-        #timer {
-            margin: 0 15px;
-            font-family: 'Digital', monospace;
-            min-width: 60px;
-        }
-        
-        #main-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            pointer-events: all;
-        }
-        
-        .title {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #f1c40f;
-            text-shadow: 0 0 10px rgba(241, 196, 15, 0.7);
-            text-align: center;
-        }
-        
-        .start-button {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 15px 50px;
-            font-size: 24px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 30px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .start-button:hover {
-            background: #c0392b;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .start-button:active {
-            transform: translateY(1px);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .start-button::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 5px;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            border-radius: 100%;
-            transform: scale(1, 1) translate(-50%);
-            transform-origin: 50% 50%;
-        }
-        
-        .start-button:focus:not(:active)::after {
-            animation: ripple 1s ease-out;
-        }
-        
-        @keyframes ripple {
-            0% {
-                transform: scale(0, 0);
-                opacity: 0.5;
-            }
-            20% {
-                transform: scale(25, 25);
-                opacity: 0.3;
-            }
-            100% {
-                opacity: 0;
-                transform: scale(40, 40);
-            }
+            gap: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .goal-effect {
@@ -155,7 +241,7 @@
             z-index: 150;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s;
+            transition: opacity 0.5s;
         }
         
         #match-result {
@@ -166,12 +252,14 @@
             background: rgba(0, 0, 0, 0.8);
             padding: 30px 50px;
             border-radius: 20px;
-            font-size: 32px;
+            font-size: 2rem;
             text-align: center;
             z-index: 180;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s;
+            transition: all 0.5s;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
         
         #match-result.show {
@@ -195,16 +283,45 @@
             opacity: 0.7;
         }
         
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        /* تأثيرات خاصة */
+        .special-effects {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
         }
         
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        .power-shot {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: powerShot 0.5s forwards;
+        }
+        
+        @keyframes powerShot {
+            to {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+        
+        /* تحسينات للواجهة */
+        .instructions {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            color: #f1c40f;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -215,7 +332,7 @@
         <div id="ui-container">
             <div id="score-board">
                 <span id="team1-score">0</span>
-                <span id="timer">02:00</span>
+                <span>:</span>
                 <span id="team2-score">0</span>
             </div>
             
@@ -224,32 +341,74 @@
             <div class="goal-effect" id="goal-effect"></div>
             
             <div class="particles" id="particles"></div>
+            <div class="special-effects" id="special-effects"></div>
         </div>
         
         <div id="main-menu">
-            <h1 class="title">كرة القدم المحترفة</h1>
-            <p>أفضل تجربة كرة قدم إلكترونية للاعبين</p>
-            <button id="start-btn" class="start-button">بدء المباراة</button>
+            <h1 class="title">كرة القدم الأسطورية</h1>
+            
+            <div class="menu-section">
+                <h2 class="menu-title">نوع اللعبة</h2>
+                <div class="option-group">
+                    <button id="singleplayer-btn" class="option-btn selected" data-mode="single">لاعب vs كمبيوتر</button>
+                    <button id="multiplayer-btn" class="option-btn" data-mode="multi">لاعب vs لاعب</button>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <h2 class="menu-title">لون فريقك</h2>
+                <div class="color-options">
+                    <div class="color-option selected" style="background: #3498db;" data-color="#3498db" data-team="1"></div>
+                    <div class="color-option" style="background: #e74c3c;" data-color="#e74c3c" data-team="1"></div>
+                    <div class="color-option" style="background: #2ecc71;" data-color="#2ecc71" data-team="1"></div>
+                    <div class="color-option" style="background: #f1c40f;" data-color="#f1c40f" data-team="1"></div>
+                    <div class="color-option" style="background: #9b59b6;" data-color="#9b59b6" data-team="1"></div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <h2 class="menu-title">لون الخصم</h2>
+                <div class="color-options">
+                    <div class="color-option" style="background: #3498db;" data-color="#3498db" data-team="2"></div>
+                    <div class="color-option selected" style="background: #e74c3c;" data-color="#e74c3c" data-team="2"></div>
+                    <div class="color-option" style="background: #2ecc71;" data-color="#2ecc71" data-team="2"></div>
+                    <div class="color-option" style="background: #f1c40f;" data-color="#f1c40f" data-team="2"></div>
+                    <div class="color-option" style="background: #9b59b6;" data-color="#9b59b6" data-team="2"></div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <h2 class="menu-title">تعليمات اللعب</h2>
+                <div class="instructions">
+                    <p><span class="highlight">الفريق الأزرق:</span> الأسهم للحركة، <span class="highlight">مسافة</span> للضربة القوية، <span class="highlight">Shift</span> للتمرير</p>
+                    <p><span class="highlight">الفريق الأحمر:</span> WASD للحركة، <span class="highlight">Q</span> للضربة القوية، <span class="highlight">E</span> للتمرير</p>
+                    <p>اضغط مطولاً على زر الضربة لشحن ضربة أقوى!</p>
+                </div>
+            </div>
+            
+            <button id="start-btn" class="start-btn">بدء المباراة</button>
         </div>
     </div>
 
     <script>
-        // ============== العناصر الأساسية ==============
+        // ====== العناصر الأساسية ======
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
-        const uiContainer = document.getElementById('ui-container');
         const mainMenu = document.getElementById('main-menu');
         const startBtn = document.getElementById('start-btn');
+        const singleplayerBtn = document.getElementById('singleplayer-btn');
+        const multiplayerBtn = document.getElementById('multiplayer-btn');
         const team1ScoreEl = document.getElementById('team1-score');
         const team2ScoreEl = document.getElementById('team2-score');
-        const timerEl = document.getElementById('timer');
         const matchResultEl = document.getElementById('match-result');
         const goalEffect = document.getElementById('goal-effect');
         const particlesContainer = document.getElementById('particles');
+        const specialEffectsContainer = document.getElementById('special-effects');
+        const colorOptions = document.querySelectorAll('.color-option');
 
-        // ============== إعدادات اللعبة ==============
+        // ====== إعدادات اللعبة ======
         const config = {
-            matchDuration: 120, // 2 دقائق بالثواني
+            matchDuration: 180, // 3 دقائق
             playerSpeed: 6,
             aiSpeed: 5,
             ballStartSpeed: 5,
@@ -264,13 +423,14 @@
             ballSize: 20,
             goalWidth: 180,
             postWidth: 12,
-            teamSize: 5,
+            teamSize: 3, // 3 لاعبين لكل فريق (حارس، مدافع، مهاجم)
             aiReactionTime: 0.3,
-            aiPassProbability: 0.03,
-            particleCount: 30
+            aiPassProbability: 0.05,
+            particleCount: 30,
+            powerShotThreshold: 80 // نسبة الشحن للضربة القوية
         };
 
-        // ============== حالات اللعبة ==============
+        // ====== حالات اللعبة ======
         let gameRunning = false;
         let matchTime = config.matchDuration;
         let matchTimer;
@@ -278,14 +438,15 @@
         let lastTime = 0;
         let selectedTeam1Color = '#3498db';
         let selectedTeam2Color = '#e74c3c';
+        let gameMode = 'single'; // 'single' أو 'multi'
 
-        // ============== كائنات اللعبة ==============
+        // ====== كائنات اللعبة ======
         const game = {
             teams: [
-                { // الفريق الأزرق (أسفل)
+                { // الفريق 1 (أسفل)
                     color: selectedTeam1Color,
                     players: [],
-                    controlledPlayer: 2,
+                    controlledPlayer: 1, // يتحكم في المهاجم
                     score: 0,
                     controls: {
                         left: 'ArrowLeft',
@@ -296,10 +457,10 @@
                         pass: 'Shift'
                     }
                 },
-                { // الفريق الأحمر (أعلى)
+                { // الفريق 2 (أعلى)
                     color: selectedTeam2Color,
                     players: [],
-                    controlledPlayer: 2,
+                    controlledPlayer: gameMode === 'single' ? -1 : 1, // -1 يعني كمبيوتر
                     score: 0,
                     controls: {
                         left: 'a',
@@ -330,14 +491,14 @@
                 grassPattern: null
             },
             goals: [
-                { // الهدف السفلي (للفريق الأحمر)
+                { // الهدف السفلي (للفريق 2)
                     x: canvas.width / 2 - config.goalWidth / 2,
                     y: canvas.height - 15,
                     width: config.goalWidth,
                     height: 15,
                     color: selectedTeam2Color
                 },
-                { // الهدف العلوي (للفريق الأزرق)
+                { // الهدف العلوي (للفريق 1)
                     x: canvas.width / 2 - config.goalWidth / 2,
                     y: 0,
                     width: config.goalWidth,
@@ -346,10 +507,11 @@
                 }
             ],
             keys: {},
-            matchEnded: false
+            matchEnded: false,
+            powerShots: [] // لتتبع الضربات القوية
         };
 
-        // ============== تهيئة اللعبة ==============
+        // ====== تهيئة اللعبة ======
         function initGame() {
             initPlayers();
             resetBall();
@@ -366,6 +528,7 @@
             matchResultEl.innerHTML = '';
             
             game.matchEnded = false;
+            game.powerShots = [];
         }
 
         function initPlayers() {
@@ -374,65 +537,100 @@
             game.goals[0].color = selectedTeam2Color;
             game.goals[1].color = selectedTeam1Color;
             
+            // تحديد وضع التحكم للفريق الثاني
+            game.teams[1].controlledPlayer = gameMode === 'single' ? -1 : 1;
+            
             game.teams.forEach((team, teamIndex) => {
                 team.players = [];
                 
-                // تشكيل الفريق (حارس، مدافعين، لاعب وسط، مهاجمين)
-                const formations = [
-                    { x: canvas.width / 2 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 50 : 30 },
-                    { x: canvas.width / 4 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 100 : 80 },
-                    { x: canvas.width * 3/4 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 100 : 80 },
-                    { x: canvas.width / 2 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 180 : 150 },
-                    { x: canvas.width / 3 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 250 : 220 },
-                    { x: canvas.width * 2/3 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 250 : 220 }
-                ];
+                // حارس المرمى
+                team.players.push({
+                    x: canvas.width / 2 - config.playerSize / 2,
+                    y: teamIndex === 0 ? canvas.height - 50 : 30,
+                    width: config.playerSize,
+                    height: config.playerSize,
+                    color: team.color,
+                    speed: teamIndex === 1 && team.controlledPlayer === -1 ? config.aiSpeed : config.playerSpeed,
+                    dx: 0,
+                    dy: 0,
+                    power: 0,
+                    isCharging: false,
+                    isControlled: false,
+                    team: teamIndex,
+                    role: 'goalkeeper',
+                    target: { x: canvas.width / 2 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 50 : 30 },
+                    state: 'goalkeeping'
+                });
                 
-                for (let i = 0; i < config.teamSize + 1; i++) {
-                    const pos = formations[i];
-                    team.players.push({
-                        x: pos.x,
-                        y: pos.y,
-                        width: config.playerSize,
-                        height: config.playerSize,
-                        color: team.color,
-                        speed: i === team.controlledPlayer ? config.playerSpeed : config.aiSpeed,
-                        dx: 0,
-                        dy: 0,
-                        power: 0,
-                        isCharging: false,
-                        isControlled: i === team.controlledPlayer,
-                        team: teamIndex,
-                        role: i === 0 ? 'goalkeeper' : i < 3 ? 'defender' : i < 4 ? 'midfielder' : 'attacker',
-                        target: { x: pos.x, y: pos.y },
-                        state: 'idle',
-                        reactionTime: 0
-                    });
-                }
+                // مدافع
+                team.players.push({
+                    x: canvas.width / 2 - config.playerSize / 2,
+                    y: teamIndex === 0 ? canvas.height - 120 : 80,
+                    width: config.playerSize,
+                    height: config.playerSize,
+                    color: team.color,
+                    speed: teamIndex === 1 && team.controlledPlayer === -1 ? config.aiSpeed : config.playerSpeed,
+                    dx: 0,
+                    dy: 0,
+                    power: 0,
+                    isCharging: false,
+                    isControlled: false,
+                    team: teamIndex,
+                    role: 'defender',
+                    target: { x: canvas.width / 2 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 120 : 80 },
+                    state: 'defending'
+                });
+                
+                // مهاجم
+                team.players.push({
+                    x: canvas.width / 2 - config.playerSize / 2,
+                    y: teamIndex === 0 ? canvas.height - 200 : 150,
+                    width: config.playerSize,
+                    height: config.playerSize,
+                    color: team.color,
+                    speed: config.playerSpeed,
+                    dx: 0,
+                    dy: 0,
+                    power: 0,
+                    isCharging: false,
+                    isControlled: team.controlledPlayer === 1,
+                    team: teamIndex,
+                    role: 'attacker',
+                    target: { x: canvas.width / 2 - config.playerSize / 2, y: teamIndex === 0 ? canvas.height - 200 : 150 },
+                    state: 'attacking'
+                });
             });
         }
 
         function createGrassPattern() {
             const patternCanvas = document.createElement('canvas');
-            patternCanvas.width = 30;
-            patternCanvas.height = 30;
+            patternCanvas.width = 60;
+            patternCanvas.height = 60;
             const patternCtx = patternCanvas.getContext('2d');
             
             patternCtx.fillStyle = '#2ecc71';
-            patternCtx.fillRect(0, 0, 30, 30);
+            patternCtx.fillRect(0, 0, 60, 60);
             
             patternCtx.strokeStyle = '#27ae60';
             patternCtx.lineWidth = 2;
-            patternCtx.beginPath();
-            patternCtx.moveTo(15, 0);
-            patternCtx.lineTo(15, 30);
-            patternCtx.moveTo(0, 15);
-            patternCtx.lineTo(30, 15);
-            patternCtx.stroke();
+            
+            // خطوط متقاطعة
+            for (let i = 0; i <= 60; i += 10) {
+                patternCtx.beginPath();
+                patternCtx.moveTo(i, 0);
+                patternCtx.lineTo(i, 60);
+                patternCtx.stroke();
+                
+                patternCtx.beginPath();
+                patternCtx.moveTo(0, i);
+                patternCtx.lineTo(60, i);
+                patternCtx.stroke();
+            }
             
             game.field.grassPattern = ctx.createPattern(patternCanvas, 'repeat');
         }
 
-        // ============== أحداث المستخدم ==============
+        // ====== أحداث المستخدم ======
         startBtn.addEventListener('click', () => {
             startBtn.style.animation = 'pulse 0.5s';
             setTimeout(() => {
@@ -443,6 +641,37 @@
             }, 500);
         });
 
+        singleplayerBtn.addEventListener('click', () => {
+            gameMode = 'single';
+            singleplayerBtn.classList.add('selected');
+            multiplayerBtn.classList.remove('selected');
+        });
+
+        multiplayerBtn.addEventListener('click', () => {
+            gameMode = 'multi';
+            multiplayerBtn.classList.add('selected');
+            singleplayerBtn.classList.remove('selected');
+        });
+
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const team = option.dataset.team;
+                const color = option.dataset.color;
+                
+                document.querySelectorAll(`.color-option[data-team="${team}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                option.classList.add('selected');
+                
+                if (team === '1') {
+                    selectedTeam1Color = color;
+                } else {
+                    selectedTeam2Color = color;
+                }
+            });
+        });
+
         window.addEventListener('keydown', (e) => {
             if (!gameRunning) return;
             
@@ -450,11 +679,11 @@
             
             game.teams.forEach(team => {
                 const player = team.players[team.controlledPlayer];
-                if (e.key === team.controls.kick) {
+                if (player && e.key === team.controls.kick) {
                     player.isCharging = true;
                 }
                 
-                if (e.key === team.controls.pass) {
+                if (player && e.key === team.controls.pass) {
                     passBall(player);
                 }
             });
@@ -467,7 +696,7 @@
             
             game.teams.forEach(team => {
                 const player = team.players[team.controlledPlayer];
-                if (e.key === team.controls.kick && player.isCharging) {
+                if (player && e.key === team.controls.kick && player.isCharging) {
                     kickBall(player);
                     player.isCharging = false;
                     player.power = 0;
@@ -475,7 +704,7 @@
             });
         });
 
-        // ============== وظائف اللعبة الأساسية ==============
+        // ====== وظائف اللعبة الأساسية ======
         function startMatch() {
             gameRunning = true;
             
@@ -500,11 +729,11 @@
             
             let resultText = '';
             if (game.teams[0].score > game.teams[1].score) {
-                resultText = `فوز الفريق الأزرق ${game.teams[0].score}-${game.teams[1].score}`;
+                resultText = `🏆 فوز الفريق الأزرق ${game.teams[0].score}-${game.teams[1].score} 🏆`;
             } else if (game.teams[1].score > game.teams[0].score) {
-                resultText = `فوز الفريق الأحمر ${game.teams[1].score}-${game.teams[0].score}`;
+                resultText = `🏆 فوز الفريق الأحمر ${game.teams[1].score}-${game.teams[0].score} 🏆`;
             } else {
-                resultText = `تعادل ${game.teams[0].score}-${game.teams[1].score}`;
+                resultText = `⚽ تعادل ${game.teams[0].score}-${game.teams[1].score} ⚽`;
             }
             
             matchResultEl.textContent = resultText;
@@ -514,18 +743,17 @@
             setTimeout(() => {
                 const replayBtn = document.createElement('button');
                 replayBtn.textContent = 'لعب مرة أخرى';
-                replayBtn.className = 'start-button';
+                replayBtn.className = 'start-btn';
                 replayBtn.style.marginTop = '20px';
                 replayBtn.style.pointerEvents = 'all';
                 replayBtn.addEventListener('click', () => {
+                    mainMenu.style.display = 'flex';
                     matchResultEl.innerHTML = '';
                     matchResultEl.classList.remove('show');
-                    initGame();
-                    startMatch();
                 });
                 
                 matchResultEl.appendChild(replayBtn);
-            }, 3000);
+            }, 2000);
         }
 
         function updateTimerDisplay() {
@@ -545,6 +773,14 @@
         function updateScoreDisplay() {
             team1ScoreEl.textContent = game.teams[0].score;
             team2ScoreEl.textContent = game.teams[1].score;
+            
+            // تأثير عند تغيير النتيجة
+            team1ScoreEl.style.transform = 'scale(1.2)';
+            team2ScoreEl.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                team1ScoreEl.style.transform = 'scale(1)';
+                team2ScoreEl.style.transform = 'scale(1)';
+            }, 200);
         }
 
         function resetBall() {
@@ -558,7 +794,7 @@
             game.ball.trail = [];
         }
 
-        // ============== ميكانيكا اللعبة ==============
+        // ====== ميكانيكا اللعبة ======
         function kickBall(player) {
             const dx = game.ball.x - (player.x + player.width / 2);
             const dy = game.ball.y - (player.y + player.height / 2);
@@ -566,7 +802,13 @@
             
             if (distance < 80) {
                 const angle = Math.atan2(dy, dx);
-                const power = player.power * config.powerShotMultiplier + 3;
+                let power = player.power * config.powerShotMultiplier + 3;
+                
+                // إذا كانت ضربة قوية
+                if (player.power > config.powerShotThreshold) {
+                    power *= 1.5;
+                    createPowerShotEffect(player.x + player.width/2, player.y + player.height/2, angle);
+                }
                 
                 game.ball.dx = Math.cos(angle) * power;
                 game.ball.dy = Math.sin(angle) * power;
@@ -576,6 +818,19 @@
                 createParticles(player.x + player.width/2, player.y + player.height/2, player.color);
                 playSound('kick');
             }
+        }
+
+        function createPowerShotEffect(x, y, angle) {
+            const effect = document.createElement('div');
+            effect.className = 'power-shot';
+            effect.style.left = `${x - 50}px`;
+            effect.style.top = `${y - 50}px`;
+            effect.style.transform = `rotate(${angle}rad)`;
+            specialEffectsContainer.appendChild(effect);
+            
+            setTimeout(() => {
+                specialEffectsContainer.removeChild(effect);
+            }, 500);
         }
 
         function passBall(player) {
@@ -610,8 +865,8 @@
                         });
                         
                         let score = 0;
-                        if (teammate.role === 'attacker') score += 50;
-                        else if (teammate.role === 'midfielder') score += 30;
+                        if (teammate.role === 'goalkeeper') score -= 50; // لا نمرر لحارس المرمى
+                        else if (teammate.role === 'attacker') score += 50;
                         
                         score += (canvas.width - distToGoal) * 0.5;
                         score += distFromOpponents * 0.8;
@@ -652,9 +907,10 @@
         }
 
         function moveAIPlayers() {
-            game.teams.forEach(team => {
-                team.players.forEach((player, index) => {
-                    if (!player.isControlled) {
+            game.teams.forEach((team, teamIndex) => {
+                // إذا كان الفريق تحت سيطرة الكمبيوتر
+                if (teamIndex === 1 && team.controlledPlayer === -1) {
+                    team.players.forEach(player => {
                         player.reactionTime -= 1/60;
                         
                         if (player.reactionTime <= 0) {
@@ -664,7 +920,6 @@
                             switch (player.state) {
                                 case 'defending': handleDefense(player); break;
                                 case 'attacking': handleAttack(player); break;
-                                case 'supporting': handleSupport(player); break;
                                 case 'goalkeeping': handleGoalkeeping(player); break;
                                 default: handlePositioning(player);
                             }
@@ -687,8 +942,8 @@
                         
                         player.x = Math.max(config.playerSize/2, Math.min(canvas.width - config.playerSize/2, player.x));
                         player.y = Math.max(config.playerSize/2, Math.min(canvas.height - config.playerSize/2, player.y));
-                    }
-                });
+                    });
+                }
             });
         }
 
@@ -698,28 +953,23 @@
                 Math.pow(game.ball.y - (player.y + player.height/2), 2)
             );
             
+            if (player.role === 'goalkeeper') {
+                player.state = 'goalkeeping';
+                return;
+            }
+            
             if (ballDist < 200) {
                 if (game.ball.lastTouch === player.team) {
                     if (player.role === 'attacker') {
                         player.state = 'attacking';
-                    } else if (player.role === 'defender' && ballDist < 150) {
-                        player.state = 'supporting';
                     } else {
-                        player.state = 'positioning';
+                        player.state = 'supporting';
                     }
                 } else {
-                    if (player.role === 'defender' || ballDist < 120) {
-                        player.state = 'defending';
-                    } else {
-                        player.state = 'positioning';
-                    }
+                    player.state = 'defending';
                 }
             } else {
                 player.state = 'positioning';
-            }
-            
-            if (player.role === 'goalkeeper') {
-                player.state = 'goalkeeping';
             }
         }
 
@@ -770,9 +1020,9 @@
                 }
                 
                 const attackPositions = [
-                    { x: goal.x + goal.width * 0.3, y: goal.y + (player.team === 0 ? -100 : 100) },
-                    { x: goal.x + goal.width * 0.7, y: goal.y + (player.team === 0 ? -100 : 100) },
-                    { x: canvas.width / 2, y: goal.y + (player.team === 0 ? -150 : 150) }
+                    { x: goal.x + goal.width * 0.3, y: goal.y + (player.team === 0 ? -80 : 80) },
+                    { x: goal.x + goal.width * 0.7, y: goal.y + (player.team === 0 ? -80 : 80) },
+                    { x: canvas.width / 2, y: goal.y + (player.team === 0 ? -120 : 120) }
                 ];
                 
                 const pos = attackPositions[Math.floor(Math.random() * attackPositions.length)];
@@ -784,24 +1034,6 @@
                     player.target.x = ballHolder.x;
                     player.target.y = ballHolder.y;
                 }
-            }
-        }
-
-        function handleSupport(player) {
-            const goal = game.goals[player.team];
-            const targetX = game.ball.x * 0.4 + (goal.x + goal.width/2) * 0.6;
-            const targetY = game.ball.y * 0.4 + (goal.y + goal.height/2) * 0.6;
-            
-            player.target.x = targetX - player.width/2;
-            player.target.y = targetY - player.height/2;
-            
-            const ballDist = Math.sqrt(
-                Math.pow(game.ball.x - (player.x + player.width/2), 2) + 
-                Math.pow(game.ball.y - (player.y + player.height/2), 2)
-            );
-            
-            if (ballDist < 60 && Math.random() < config.aiPassProbability * 2) {
-                passBall(player);
             }
         }
 
@@ -840,28 +1072,23 @@
             switch (player.role) {
                 case 'defender':
                     basePos = {
-                        x: canvas.width / (player.team === 0 ? 2 : 2),
-                        y: player.team === 0 ? canvas.height - 100 : 100
-                    };
-                    break;
-                case 'midfielder':
-                    basePos = {
                         x: canvas.width / 2,
-                        y: player.team === 0 ? canvas.height - 180 : 180
+                        y: player.team === 0 ? canvas.height - 120 : 80
                     };
                     break;
                 case 'attacker':
                     basePos = {
-                        x: canvas.width / (player.team === 0 ? 2 : 2),
-                        y: player.team === 0 ? canvas.height - 250 : 250
+                        x: canvas.width / 2,
+                        y: player.team === 0 ? canvas.height - 200 : 150
                     };
                     break;
                 default:
                     basePos = { x: canvas.width / 2, y: canvas.height / 2 };
             }
             
-            basePos.x += (Math.random() - 0.5) * 100;
-            basePos.y += (Math.random() - 0.5) * 50;
+            // بعض التباين في الموضع
+            basePos.x += (Math.random() - 0.5) * 50;
+            basePos.y += (Math.random() - 0.5) * 30;
             
             player.target.x = basePos.x - player.width/2;
             player.target.y = basePos.y - player.height/2;
@@ -961,6 +1188,7 @@
             goalEffect.style.backgroundColor = color;
             goalEffect.style.opacity = '0.8';
             
+            // جسيمات احتفالية
             for (let i = 0; i < 50; i++) {
                 setTimeout(() => {
                     createParticles(
@@ -971,12 +1199,18 @@
                 }, i * 50);
             }
             
+            // تأثير اهتزاز
+            canvas.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                canvas.style.animation = '';
+            }, 500);
+            
             setTimeout(() => {
                 goalEffect.style.opacity = '0';
             }, 1000);
         }
 
-        // ============== نظام تسجيل الأهداف الذكي ==============
+        // ====== نظام تسجيل الأهداف الذكي ======
         function checkGoals() {
             game.goals.forEach((goal, index) => {
                 if (isBallInGoal(goal)) {
@@ -993,7 +1227,7 @@
                             setTimeout(resetBall, 1000);
                         }
                     } else {
-                        // إذا دخلت الكرة مرمى الفريق نفسه، لا تحتسب مع إعادة تعيين الكرة
+                        // إذا دخلت الكرة مرمى الفريق نفسه، لا تحتسب
                         setTimeout(resetBall, 500);
                     }
                 }
@@ -1009,55 +1243,66 @@
             );
         }
 
-        // ============== تحديث اللعبة ==============
+        // ====== تحديث اللعبة ======
         function update(deltaTime) {
             const deltaSeconds = deltaTime / 1000;
             
+            // تحديث شحن الضربة للاعبين
             game.teams.forEach(team => {
                 const player = team.players[team.controlledPlayer];
-                if (player.isCharging && player.power < 100) {
+                if (player && player.isCharging && player.power < 100) {
                     player.power += deltaSeconds * 50;
                     if (player.power > 100) player.power = 100;
                 }
             });
             
+            // حركة اللاعبين المتحكم بهم
             game.teams.forEach(team => {
                 const player = team.players[team.controlledPlayer];
-                player.dx = 0;
-                player.dy = 0;
-                
-                if (game.keys[team.controls.left]) player.dx = -player.speed;
-                if (game.keys[team.controls.right]) player.dx = player.speed;
-                if (game.keys[team.controls.up]) player.dy = -player.speed;
-                if (game.keys[team.controls.down]) player.dy = player.speed;
-                
-                player.x += player.dx * deltaSeconds * 60;
-                player.y += player.dy * deltaSeconds * 60;
-                
-                player.x = Math.max(config.playerSize/2, Math.min(canvas.width - config.playerSize/2, player.x));
-                player.y = Math.max(config.playerSize/2, Math.min(canvas.height - config.playerSize/2, player.y));
+                if (player) {
+                    player.dx = 0;
+                    player.dy = 0;
+                    
+                    if (game.keys[team.controls.left]) player.dx = -player.speed;
+                    if (game.keys[team.controls.right]) player.dx = player.speed;
+                    if (game.keys[team.controls.up]) player.dy = -player.speed;
+                    if (game.keys[team.controls.down]) player.dy = player.speed;
+                    
+                    player.x += player.dx * deltaSeconds * 60;
+                    player.y += player.dy * deltaSeconds * 60;
+                    
+                    player.x = Math.max(config.playerSize/2, Math.min(canvas.width - config.playerSize/2, player.x));
+                    player.y = Math.max(config.playerSize/2, Math.min(canvas.height - config.playerSize/2, player.y));
+                }
             });
             
+            // حركة اللاعبين الآليين
             moveAIPlayers();
+            
+            // انجذاب الكرة للاعبين القريبين
             applyBallAttraction();
             
+            // حركة الكرة
             game.ball.x += game.ball.dx * deltaSeconds * 60;
             game.ball.y += game.ball.dy * deltaSeconds * 60;
             
             game.ball.dx *= Math.pow(config.friction, deltaSeconds * 60);
             game.ball.dy *= Math.pow(config.friction, deltaSeconds * 60);
             
+            // إضافة موقع الكرة إلى السلسلة
             game.ball.trail.push({ x: game.ball.x, y: game.ball.y });
             if (game.ball.trail.length > 10) {
                 game.ball.trail.shift();
             }
             
+            // إذا كانت سرعة الكرة بطيئة جدًا، توقف
             const ballSpeed = Math.sqrt(game.ball.dx * game.ball.dx + game.ball.dy * game.ball.dy);
             if (ballSpeed < 0.1) {
                 game.ball.dx = 0;
                 game.ball.dy = 0;
             }
             
+            // ارتداد الكرة من الجدران
             if (game.ball.x - game.ball.radius < game.field.padding) {
                 game.ball.x = game.field.padding + game.ball.radius;
                 game.ball.dx *= -config.bounceFriction;
@@ -1079,6 +1324,7 @@
                 playSound('wall');
             }
             
+            // ارتداد الكرة من اللاعبين
             game.teams.forEach(team => {
                 team.players.forEach(player => {
                     if (
@@ -1115,7 +1361,7 @@
             checkGoals();
         }
 
-        // ============== عرض اللعبة ==============
+        // ====== رسم اللعبة ======
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -1172,66 +1418,16 @@
                         ctx.strokeRect(player.x - 2, player.y - 2, player.width + 4, player.height + 4);
                     }
                     
-                    // العيون
+                    // رسم رقم اللاعب
                     ctx.fillStyle = 'white';
-                    const eyeOffsetX = player.dx !== 0 ? (player.dx > 0 ? 2 : -2) : 0;
-                    const eyeOffsetY = player.dy !== 0 ? (player.dy > 0 ? 2 : -2) : 0;
-                    
-                    ctx.beginPath();
-                    ctx.arc(
-                        player.x + player.width * 0.3 + eyeOffsetX,
-                        player.y + player.height * 0.4 + eyeOffsetY,
-                        player.width * 0.12,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                    
-                    ctx.beginPath();
-                    ctx.arc(
-                        player.x + player.width * 0.7 + eyeOffsetX,
-                        player.y + player.height * 0.4 + eyeOffsetY,
-                        player.width * 0.12,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                    
-                    // بؤبؤ العين
-                    ctx.fillStyle = 'black';
-                    ctx.beginPath();
-                    ctx.arc(
-                        player.x + player.width * 0.3 + eyeOffsetX,
-                        player.y + player.height * 0.4 + eyeOffsetY,
-                        player.width * 0.06,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                    
-                    ctx.beginPath();
-                    ctx.arc(
-                        player.x + player.width * 0.7 + eyeOffsetX,
-                        player.y + player.height * 0.4 + eyeOffsetY,
-                        player.width * 0.06,
-                        0,
-                        Math.PI * 2
-                    );
-                    ctx.fill();
-                    
-                    // الفم
-                    const mouthOpen = Math.sqrt(player.dx * player.dx + player.dy * player.dy) > 0.5 ? 0.3 : 0.1;
-                    ctx.beginPath();
-                    ctx.arc(
-                        player.x + player.width * 0.5,
-                        player.y + player.height * 0.7,
-                        player.width * 0.2,
-                        mouthOpen,
-                        Math.PI - mouthOpen
-                    );
-                    ctx.strokeStyle = 'black';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                    ctx.font = `${config.playerSize * 0.5}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    let playerNumber = '';
+                    if (player.role === 'goalkeeper') playerNumber = '1';
+                    else if (player.role === 'defender') playerNumber = '2';
+                    else if (player.role === 'attacker') playerNumber = '3';
+                    ctx.fillText(playerNumber, player.x + player.width/2, player.y + player.height/2);
                 });
             });
             
@@ -1255,6 +1451,7 @@
             ctx.arc(game.ball.x, game.ball.y, game.ball.radius, 0, Math.PI * 2);
             ctx.fill();
             
+            // تفاصيل الكرة
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 1.5;
             
@@ -1269,28 +1466,9 @@
                     angle + 0.3
                 );
                 ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.arc(
-                    game.ball.x, 
-                    game.ball.y, 
-                    game.ball.radius * 0.6, 
-                    angle - 0.4, 
-                    angle + 0.4
-                );
-                ctx.stroke();
-                
-                ctx.beginPath();
-                ctx.arc(
-                    game.ball.x, 
-                    game.ball.y, 
-                    game.ball.radius * 0.3, 
-                    angle - 0.5, 
-                    angle + 0.5
-                );
-                ctx.stroke();
             }
             
+            // ذيل الكرة عند الحركة السريعة
             if (ballSpeed > 10) {
                 const angle = Math.atan2(game.ball.dy, game.ball.dx);
                 const trailLength = Math.min(30, ballSpeed * 2);
@@ -1307,7 +1485,7 @@
             }
         }
 
-        // ============== حلقة اللعبة الرئيسية ==============
+        // ====== حلقة اللعبة الرئيسية ======
         function gameLoop(timestamp) {
             if (!lastTime) lastTime = timestamp;
             const deltaTime = timestamp - lastTime;
