@@ -26,11 +26,14 @@
         
         #game-container {
             position: relative;
-            width: 2000px;
-            height: 1000px;
+            width: 1000px;
+            height: 600px;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
             border-radius: 10px;
-            overflow: hidden;
+            
+            justify-content: flex-start; /* تغيير من center إلى flex-start */
+            padding-top: 20px; /* إضافة مسافة من الأعلى */
+            overflow-y: auto; /* تمكين التمرير إذا لزم الأمر */
         }
         
         #game-canvas {
@@ -51,6 +54,9 @@
             align-items: center;
             z-index: 200;
             transition: all 0.5s;
+            justify-content: flex-start; /* تغيير من center إلى flex-start */
+            padding-top: 20px; /* إضافة مسافة من الأعلى */
+            overflow-y: auto; /* تمكين التمرير إذا لزم الأمر */
         }
         
         .title {
