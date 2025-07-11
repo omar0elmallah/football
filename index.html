@@ -231,6 +231,19 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
+        #timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
         .goal-effect {
             position: absolute;
             top: 0;
@@ -336,6 +349,8 @@
                 <span id="team2-score">0</span>
             </div>
             
+            <div id="timer">03:00</div>
+            
             <div id="match-result"></div>
             
             <div class="goal-effect" id="goal-effect"></div>
@@ -400,6 +415,7 @@
         const multiplayerBtn = document.getElementById('multiplayer-btn');
         const team1ScoreEl = document.getElementById('team1-score');
         const team2ScoreEl = document.getElementById('team2-score');
+        const timerEl = document.getElementById('timer');
         const matchResultEl = document.getElementById('match-result');
         const goalEffect = document.getElementById('goal-effect');
         const particlesContainer = document.getElementById('particles');
